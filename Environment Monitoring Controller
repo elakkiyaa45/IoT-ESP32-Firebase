@@ -1,0 +1,137 @@
+Abstract
+ This project presents an IoT-based real-time monitoring system using the ESP32 microcontroller and Firebase Realtime Database. The system collects environmental data such as temperature and humidity and sends it to the cloud through WiFi using HTTP REST API. The data is stored in Firebase and displayed in real time on a web dashboard. This project demonstrates the integration of embedded systems with cloud technology for remote monitoring applications. It is useful for smart homes, environmental monitoring, and industrial applications.
+Introduction
+ The Internet of Things (IoT) enables physical devices to connect and communicate over the internet. In this project, ESP32 is used as the main controller because it has built-in WiFi capability. The system reads sensor data and sends it to Firebase Realtime Database. A web page is used to display the live data.
+This project helps to understand IoT communication, cloud data storage, and real-time monitoring systems.
+Components Used
+i)ESP32 Microcontroller
+ii)WiFi Network (Wokwi / Mobile Hotspot)
+iii)Firebase Realtime Database
+iv)HTML, JavaScript
+v)Arduino IDE / Wokwi Simulator
+Working Principle
+     i)ESP32 is powered ON
+    ii)It connects to WiFi network
+    iii)Sensor values (temperature & humidity) are generated or read
+    iv)ESP32 sends data to Firebase using HTTP REST API
+    v)Firebase stores data in real time
+    vi)Web page reads Firebase data
+    vii)Data is displayed in browser
+    viii)System updates continuously every few seconds
+Block Flow
+ESP32 → WiFi → Firebase → Web Dashboard → User
+ESP32 Code (Arduino)
+#include <WiFi.h>
+#include <HTTPClient.h>
+
+#define WIFI_SSID "Wokwi-GUEST"
+#define WIFI_PASSWORD ""
+
+//  Your Firebase URL
+String firebaseHost = "https://myfirstfirebaseapp-eca00-default-rtdb.firebaseio.com";
+
+void setup() {
+  Serial.begin(115200);
+
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+
+  Serial.print("Connecting WiFi");
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+
+  Serial.println("\nWiFi Connected");
+}
+
+void loop() {
+
+  // 🌿 Only your required sensors
+  float temp = 28 + random(-2, 3);
+  float hum = 65 + random(-5, 5);
+
+  if (WiFi.status() == WL_CONNECTED) {
+
+    HTTPClient http;
+
+    String url = firebaseHost + "/sensor.json";
+
+    http.begin(url);
+    http.addHeader("Content-Type", "application/json");
+
+    // ONLY temperature & humidity
+    String jsonData = "{";
+    jsonData += "\"temperature\":" + String(temp) + ",";
+    jsonData += "\"humidity\":" + String(hum);
+    jsonData += "}";
+
+    int httpResponseCode = http.PUT(jsonData);
+
+    Serial.println("Updated Firebase:");
+    Serial.println(jsonData);
+
+    http.end();
+  }
+
+  delay(3000);
+}
+Web Dashboard Code
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Realtime Sensor Data</title>
+</head>
+<body>
+
+<h1>Realtime Sensor Data</h1>
+
+<p>Temperature: <span id="temp">--</span> °C</p>
+<p>Humidity: <span id="hum">--</span> %</p>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+<script>
+  const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "myfirstfirebaseapp-eca00.firebaseapp.com",
+    databaseURL: "https://myfirstfirebaseapp-eca00-default-rtdb.firebaseio.com",
+    projectId: "myfirstfirebaseapp-eca00",
+    storageBucket: "myfirstfirebaseapp-eca00.firebasestorage.app",
+    messagingSenderId: "429316536448",
+    appId: "1:429316536448:web:eedf9205d266f73a418e65"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+
+  const db = firebase.database();
+
+  db.ref("sensor").on("value", (snapshot) => {
+    const data = snapshot.val();
+    document.getElementById("temp").innerText = data.temperature;
+    document.getElementById("hum").innerText = data.humidity;
+  });
+</script>
+
+</body>
+</html>
+ Output
+Real-time temperature and humidity display
+Cloud-based data storage using Firebase
+Live updates every few seconds
+Accessible from any browser
+ Advantages
+Real-time monitoring
+Wireless data transfer
+Low cost system
+Easy cloud integration
+Remote access from anywhere
+ Applications
+Smart homes
+Weather monitoring systems
+Industrial automation
+Agriculture monitoring
+Smart city projects
+📌 Conclusion
+
+This project successfully demonstrates a real-time IoT monitoring system using ESP32 and Firebase. It helps in understanding cloud communication, embedded systems, and web integration. The system is efficient, low-cost, and scalable for various real-world applications.
